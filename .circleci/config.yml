@@ -167,6 +167,7 @@ jobs:
               "Name=instance-state-name,Values=running" \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
               --output text >> inventory
+            cat inventory
       - run:
           name: Install tar utility
           command: |
@@ -181,15 +182,15 @@ jobs:
       - image: ansible/ansible:ubuntu1404
     steps:
       - checkout
-      - attach_workspace:
-          at: ~/
       - add_ssh_keys:
           fingerprints:
             - "f9:ce:81:f5:7a:3d:ea:e3:72:a2:4c:8f:89:c0:c8:41"
       - run:
           name: Adding fingerprint
           command: |
-            ssh -v ${USER_NAME}@ec{cat inventory}.compute-1.amazonaws.com
+            ssh -v ${USER_NAME}@${HOST_NAME}
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
