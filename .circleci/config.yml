@@ -167,6 +167,7 @@ jobs:
               "Name=instance-state-name,Values=running" \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
               --output text >> inventory
+            cat inventory
       - run:
           name: Install tar utility
           command: |
