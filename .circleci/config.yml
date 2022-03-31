@@ -167,7 +167,6 @@ jobs:
               "Name=instance-state-name,Values=running" \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
               --output text >> inventory
-            cat inventory
       - run:
           name: Install tar utility
           command: |
@@ -188,7 +187,7 @@ jobs:
       - run:
           name: Adding fingerprint
           command: |
-            ssh -v ${USER_NAME}@${HOST_NAME}
+            ssh -v ${USER_NAME}@ec{cat inventory}.compute-1.amazonaws.com
       - attach_workspace:
           at: ~/
       - run:
