@@ -182,11 +182,11 @@ jobs:
       - image: ansible/ansible:ubuntu1404
     steps:
       - checkout
-      - attach_workspace:
-          at: ~/
       - add_ssh_keys:
           fingerprints:
             - "f9:ce:81:f5:7a:3d:ea:e3:72:a2:4c:8f:89:c0:c8:41"
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
