@@ -190,7 +190,9 @@ jobs:
       - run:
           name: Adding fingerprint
           command: |
-            ssh -v ${USER_NAME}@${HOST_NAME}
+            ssh -o UserKnownHostsFile=/dev/null \
+              -o StrictHostKeyChecking=no \ 
+              -v ${USER_NAME}@${HOST_NAME}
       - run:
           name: Install dependencies
           command: |
