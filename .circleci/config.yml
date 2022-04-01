@@ -102,7 +102,7 @@ jobs:
             # npm install oauth-sign@^0.9.0
             npm audit fix --audit-level=critical --force
       - save_cache:
-          paths: [ frontend/node-modules ]
+          paths: [ frontend/node_modules ]
           key: analyze-frontend
   deploy:
     executor:
@@ -132,7 +132,7 @@ jobs:
             # npm install oauth-sign@^0.9.0
             npm audit fix --audit-level=critical --force
       - save_cache:
-          paths: [ backend/node-modules ]
+          paths: [ backend/node_modules ]
           key: analyze-backend
 
   deploy-infrastructure:
@@ -223,7 +223,7 @@ jobs:
               curl https://kvdb.io/Ru682osuUW14eAadnG4dq8/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - save_cache:
-          paths: [ backend/node-modules ]
+          paths: [ backend/node_modules ]
           key: migrate-backend
       # Here's where you will add some code to rollback on failure
 
