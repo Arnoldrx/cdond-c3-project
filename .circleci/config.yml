@@ -175,8 +175,7 @@ jobs:
               --filters \
               "Name=instance-state-name,Values=running" \
               --query 'Reservations[*].Instances[*].[PublicIpAddress]' \
-              --output text >> inventory
-            cat inventory
+              --output text >> .circleci/ansible/inventory.txt
       - run:
           name: Install tar utility
           command: |
