@@ -7,20 +7,29 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      ID:
+      workflow_id:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy environments
           when: on_fail
+          command: |   
+            echo "Destroying environment: <<parameters.workflow_id>> "
+            aws cloudformation delete-stack --stack-name udapeople-backend-<<pipeline.workflow_idD>> --region us-east-1
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<<pipeline.workflow_id>> --region us-east-1
+  undo_migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
           command: |
-            aws cloudformation delete-stack \
-            --stack-name udapeople-backend-<<pipeline.parameters.ID>> \
-            --region us-east-1 \
-            aws cloudformation delete-stack \
-            --stack-name udapeople-frontend-<<pipeline.parameters.ID>> \
-            --region us-east-1
+            cd ~/project/backend
+            if [[ -f "curl -k https://kvdb.io/Ru682osuUW14eAadnG4dq8/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'" ]]; then
+              npm i
+              npm run migration:revert
+            fi
 
 jobs:
   build-frontend:
@@ -223,6 +232,39 @@ jobs:
             fi
       # Here's where you will add some code to rollback on failure
 
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar curl nodejs npm
+            pip install awscli
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances...............)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy_environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - undo_migrations
+      # Here's where you will add some code to rollback on failure
+
 workflows:
   default:
     jobs:
@@ -245,5 +287,7 @@ workflows:
           requires: [ deploy-infrastructure ]
       - run-migrations:
           requires: [ configure-infrastructure ]
+      - deploy-frontend:
+          requires: [ run-migrations ]
 #     - deploy:
 #         context: slack-secrets
