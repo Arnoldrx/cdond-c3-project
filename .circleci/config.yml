@@ -15,9 +15,9 @@ commands:
           when: on_fail
           command: |   
             echo "Destroying environment: <<parameters.workflow_id>> "
-            aws cloudformation delete-stack --stack-name udapeople-backend-<<pipeline.workflow_idD>> --region us-east-1
+            aws cloudformation delete-stack --stack-name udapeople-backend-<<parameters.workflow_id>> --region us-east-1
             aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<<pipeline.workflow_id>> --region us-east-1
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflow_id>> --region us-east-1
   undo_migrations:
     description: Revert the last migration if successfully run in the current workflow.
     steps:
