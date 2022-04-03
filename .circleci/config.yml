@@ -451,10 +451,10 @@ workflows:
           filters:
             branches:
               only: [ master ]
-      - cleanup:
-          requires: [ cloudfront-update ]
-          filters:
-            branches:
-              only: [ master ]
+#      - cleanup:
+#          requires: [ cloudfront-update ]
+#          filters:
+#            branches:
+#              only: [ master ]
 #     - deploy:
-#         context: slack-secrets
+#         context: slack-secrets:
