@@ -31,7 +31,6 @@ commands:
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             SUCCESS=$(curl --insecure  https://kvdb.io/Ru682osuUW14eAadnG4dq8/migration_<<parameters.workflow_id>>)
-            echo "$SUCCESS"
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -342,10 +341,35 @@ jobs:
             echo ${URL}
             if curl -s ${URL} | grep "Welcome"
             then
-                return 1 
+                return 0
             else
                 return 1
             fi
+      - destroy_environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            yum -y install tar gzip
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --stack-name UdaP \
+              --region us-east-1 \
+              --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
       - destroy_environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations:
@@ -380,5 +404,7 @@ workflows:
           requires: [ run-migrations ]
       - smoke-test:
           requires: [ deploy-backend, deploy-frontend ]
+      - cloudfront-update:
+          requires: [ smoke-test ]
 #     - deploy:
 #         context: slack-secrets
